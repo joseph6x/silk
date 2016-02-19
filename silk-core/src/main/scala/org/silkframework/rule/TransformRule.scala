@@ -27,6 +27,9 @@ sealed trait TransformRule {
   /** The target property URI. */
   def target: Option[Uri]
 
+  /** The child rules for this rule. */
+  def childRules: Seq[TransformRule] = Seq.empty
+
   /**
    * Generates the transformed values.
    *
@@ -130,6 +133,16 @@ case class TypeMapping(name: Identifier = "type", typeUri: Uri = "http://www.w3.
  * @param target The target property URI
  */
 case class ComplexMapping(name: Identifier = "mapping", operator: Input, target: Option[Uri] = None) extends TransformRule
+
+// TODO document
+case class ChildMapping(name: Identifier = "child", relativePath: Path = Path(Nil), targetProperty: Uri = "hasChild",
+                        override val childRules: Seq[TransformRule]) extends TransformRule {
+
+  override val operator = PathInput(path = relativePath)
+
+  override val target = Some(targetProperty)
+
+}
 
 /**
  * Creates new transform rules.

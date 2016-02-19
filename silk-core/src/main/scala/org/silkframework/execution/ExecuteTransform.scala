@@ -2,7 +2,7 @@ package org.silkframework.execution
 
 import org.silkframework.config.DatasetSelection
 import org.silkframework.dataset.{DataSource, EntitySink}
-import org.silkframework.entity.EntitySchema
+import org.silkframework.entity.{Entity, EntitySchema}
 import org.silkframework.rule.TransformRule
 import org.silkframework.runtime.activity.{Activity, ActivityContext}
 
