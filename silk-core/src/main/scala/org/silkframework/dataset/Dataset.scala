@@ -15,14 +15,13 @@
 package org.silkframework.dataset
 
 import java.util.logging.Logger
-
 import org.silkframework.config.Prefixes
 import org.silkframework.entity.Link
 import org.silkframework.runtime.resource.ResourceManager
 import org.silkframework.runtime.serialization.XmlFormat
 import org.silkframework.util.Identifier
-
 import scala.xml.{Node, Text}
+import org.silkframework.util.GlobalV
 
 /**
  * A dataset of entities.
@@ -134,23 +133,27 @@ object Dataset {
       if(node.label == "DataSource" || node.label == "Output") {
         // Read old format
         val id = (node \ "@id").text
-        new Dataset(
+        val aux=new Dataset(
           id = if(id.nonEmpty) id else Identifier.random,
           plugin = DatasetPlugin((node \ "@type").text, readParams(node)),
           minConfidence = (node \ "@minConfidence").headOption.map(_.text.toDouble),
           maxConfidence = (node \ "@maxConfidence").headOption.map(_.text.toDouble)
         )
+        GlobalV.DataSources+=aux
+        aux
       } else {
         // Read new format
         val id = (node \ "@id").text
         // In outdated formats the plugin parameters are nested inside a DatasetPlugin node
         val sourceNode = (node \ "DatasetPlugin").headOption.getOrElse(node)
-        new Dataset(
+        val aux=new Dataset(
           id = if(id.nonEmpty) id else Identifier.random,
           plugin = DatasetPlugin((sourceNode \ "@type").text, readParams(sourceNode)),
           minConfidence = (node \ "@minConfidence").headOption.map(_.text.toDouble),
           maxConfidence = (node \ "@maxConfidence").headOption.map(_.text.toDouble)
         )
+        GlobalV.DataSources+=aux
+        aux
       }
     }
 

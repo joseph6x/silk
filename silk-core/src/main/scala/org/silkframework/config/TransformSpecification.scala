@@ -18,7 +18,7 @@ import scala.xml.Node
 case class TransformSpecification(id: Identifier = Identifier.random, selection: DatasetSelection, rules: Seq[TransformRule], outputs: Seq[Identifier] = Seq.empty) {
 
   def entitySchema = {
-    EntitySchema(
+    EntitySchema(selection.inputId,
       typeUri = selection.typeUri,
       paths = rules.flatMap(_.paths).distinct.toIndexedSeq,
       filter = selection.restriction

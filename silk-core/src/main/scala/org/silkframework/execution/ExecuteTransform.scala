@@ -27,7 +27,7 @@ class ExecuteTransform(input: DataSource,
     isCanceled = false
     // Retrieve entities
     val entitySchema =
-      EntitySchema(
+      EntitySchema(selection.inputId,
         typeUri = selection.typeUri,
         paths = rules.flatMap(_.paths).distinct.toIndexedSeq,
         filter = selection.restriction

@@ -28,7 +28,7 @@ class EvaluateTransform(source: Dataset,
   def execute(): Seq[DetailedEntity] = {
     // Retrieve entities
     val entityDesc =
-      EntitySchema(
+      EntitySchema(dataSelection.inputId,
         typeUri = dataSelection.typeUri,
         paths = rules.flatMap(_.paths).toIndexedSeq,
         filter = dataSelection.restriction

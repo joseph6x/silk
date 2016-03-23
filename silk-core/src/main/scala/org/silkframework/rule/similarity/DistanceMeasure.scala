@@ -30,6 +30,10 @@ trait DistanceMeasure extends AnyPlugin {
    */
   def apply(values1: Seq[String], values2: Seq[String], limit: Double = Double.PositiveInfinity): Double
 
+  def apply_Validation(uri1: String, endpoint1: String, uri2: String, endpoint2:String,values1: Seq[String], values2: Seq[String], limit: Double = Double.PositiveInfinity): Double ={
+    return apply(values1,values2,limit)    
+  }
+  
   def index(values: Seq[String], limit: Double): Index = Index.default
 }
 

@@ -21,7 +21,7 @@ import org.silkframework.rule.input.Input
 import org.silkframework.runtime.resource.ResourceManager
 import org.silkframework.runtime.serialization.{Serialization, XmlFormat}
 import org.silkframework.runtime.validation.ValidationException
-import org.silkframework.util.{DPair, Identifier}
+import org.silkframework.util.{DPair, Identifier, GlobalV}
 
 import scala.xml.Node
 
@@ -50,11 +50,21 @@ case class Comparison(id: Identifier = Operator.generateId,
     val values1 = inputs.source(entities.source)
     val values2 = inputs.target(entities.target)
 
+    var endpoint1=GlobalV.DataSources.find { x => x.id==entities.source.desc.Endpoint }.get.plugin.parameters.get("endpointURI").get
+    var endpoint2=GlobalV.DataSources.find { x => x.id==entities.target.desc.Endpoint }.get.plugin.parameters.get("endpointURI").get
+    var uri1=entities.source.uri
+    var uri2=entities.target.uri
+    
     if (values1.isEmpty || values2.isEmpty)
       None
     else {
-      val distance = metric(values1, values2, threshold * (1.0 - limit))
-
+      var distance=0.0;
+      if (endpoint1==endpoint2 && uri1==uri2){
+        distance=1
+      }else{
+        distance = metric.apply_Validation(uri1,endpoint1,uri2,endpoint2,values1, values2, threshold * (1.0 - limit))  
+      }
+      //val distance = metric(values1, values2, threshold * (1.0 - limit))
       if (distance == 0.0 && threshold == 0.0)
         Some(1.0)
       else if (distance <= 2.0 * threshold)

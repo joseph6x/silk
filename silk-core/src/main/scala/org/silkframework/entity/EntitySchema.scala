@@ -14,7 +14,7 @@ import scala.xml.Node
  * @param paths The list of paths
  * @param filter A filter for restricting the entity set
  */
-case class EntitySchema(typeUri: Uri, paths: IndexedSeq[Path], filter: Restriction = Restriction.empty) {
+case class EntitySchema(Endpoint: String,typeUri: Uri, paths: IndexedSeq[Path], filter: Restriction = Restriction.empty) {
   require(filter.paths.forall(paths.contains), "All paths that are used in restriction must be contained in paths list.")
 
   /**
@@ -33,7 +33,7 @@ case class EntitySchema(typeUri: Uri, paths: IndexedSeq[Path], filter: Restricti
 
 object EntitySchema {
 
-  def empty = EntitySchema(Uri(""), IndexedSeq[Path](), Restriction.empty)
+  def empty = EntitySchema("",Uri(""), IndexedSeq[Path](), Restriction.empty)
 
   /**
     * XML serialization format.
@@ -43,7 +43,7 @@ object EntitySchema {
       * Deserialize an EntitySchema from XML.
       */
     def read(node: Node)(implicit prefixes: Prefixes, resources: ResourceManager) = {
-      EntitySchema(
+      EntitySchema("",
         typeUri = Uri((node \ "Type").text),
         paths = for (pathNode <- (node \ "Paths" \ "Path").toIndexedSeq) yield Path.parse(pathNode.text.trim),
         filter = Restriction.parse((node \ "Restriction").text)

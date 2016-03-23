@@ -64,7 +64,7 @@ class TransformedDataSource(source: DataSource, transform: TransformSpecificatio
       }
 
     val sourceEntitySchema =
-      EntitySchema(
+      EntitySchema(transform.selection.inputId,
         typeUri = transform.selection.typeUri,
         paths = pathRules.flatten.flatMap(_.paths).distinct.toIndexedSeq,
         filter = transform.selection.restriction

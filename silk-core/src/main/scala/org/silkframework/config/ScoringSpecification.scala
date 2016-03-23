@@ -10,7 +10,7 @@ import org.silkframework.util.Identifier
 case class ScoringSpecification(id: Identifier = Identifier.random, selection: DatasetSelection, rules: Seq[ScoringRule], outputs: Seq[Identifier] = Seq.empty) {
 
   def entityDescription = {
-    EntitySchema(
+    EntitySchema(selection.inputId,
       typeUri = selection.typeUri,
       paths = rules.flatMap(_.toTransform.paths).distinct.toIndexedSeq,
       filter = selection.restriction

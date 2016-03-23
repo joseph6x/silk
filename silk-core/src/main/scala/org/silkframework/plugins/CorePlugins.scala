@@ -122,6 +122,7 @@ class CorePlugins extends PluginModule {
     classOf[DateTimeMetric] ::
     classOf[GeographicDistanceMetric] ::
     classOf[JaccardDistance] ::
+    classOf[JaccardDistanceWithContextValidation] ::
     classOf[DiceCoefficient] ::
     classOf[SoftJaccardDistance] ::
     classOf[TokenwiseStringDistance] ::
