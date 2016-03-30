@@ -37,7 +37,7 @@ class FileDataSourceTest extends FlatSpec with Matchers {
   val dataset = new FileDataset(resourceLoader.get(fileName), "N-TRIPLE")
 
   val entityDescCity =
-    EntitySchema(
+    EntitySchema("",
       typeUri = Uri("http://dbpedia.org/ontology/City"),
       paths = IndexedSeq(Path.parse("?a/rdfs:label"))
     )
@@ -57,7 +57,7 @@ class FileDataSourceTest extends FlatSpec with Matchers {
   val pathCities = Path.parse("""?a/do:place[rdf:type = do:City]/rdfs:label""")
 
   val entityDescPerson =
-    EntitySchema(
+    EntitySchema("",
       typeUri = Uri("http://dbpedia.org/ontology/Person"),
       paths = IndexedSeq(pathPlaces, pathPlacesCalledMunich, pathCities)
     )

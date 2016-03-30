@@ -30,7 +30,8 @@ lazy val core = (project in file("silk-core"))
     libraryDependencies += "com.thoughtworks.paranamer" % "paranamer" % "2.7",
     // Additional scala standard libraries
     libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
-    libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+    libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
+	test in assembly := {}
   )
 
 lazy val learning = (project in file("silk-learning"))
@@ -58,7 +59,8 @@ lazy val pluginsRdf = (project in file("silk-plugins/silk-plugins-rdf"))
   .settings(
     name := "Silk Plugins RDF",
     libraryDependencies += "org.apache.jena" % "jena-core" % "2.13.0" exclude("org.slf4j", "slf4j-log4j12"),
-    libraryDependencies += "org.apache.jena" % "jena-arq" % "2.13.0" exclude("org.slf4j", "slf4j-log4j12")
+    libraryDependencies += "org.apache.jena" % "jena-arq" % "2.13.0" exclude("org.slf4j", "slf4j-log4j12"),
+	test in assembly := {}
   )
 
 lazy val pluginsCsv = (project in file("silk-plugins/silk-plugins-csv"))
@@ -66,14 +68,16 @@ lazy val pluginsCsv = (project in file("silk-plugins/silk-plugins-csv"))
   .settings(commonSettings: _*)
   .settings(
     name := "Silk Plugins CSV",
-    libraryDependencies += "com.univocity" % "univocity-parsers" % "1.5.6"
+    libraryDependencies += "com.univocity" % "univocity-parsers" % "1.5.6",
+	test in assembly := {}
   )
 
 lazy val pluginsXml = (project in file("silk-plugins/silk-plugins-xml"))
   .dependsOn(core)
   .settings(commonSettings: _*)
   .settings(
-    name := "Silk Plugins XML"
+    name := "Silk Plugins XML",
+	test in assembly := {}
   )
 
 lazy val pluginsJson = (project in file("silk-plugins/silk-plugins-json"))
@@ -81,7 +85,8 @@ lazy val pluginsJson = (project in file("silk-plugins/silk-plugins-json"))
   .settings(commonSettings: _*)
   .settings(
     name := "Silk Plugins JSON",
-    libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10"
+    libraryDependencies += "com.typesafe.play" % "play-json_2.11" % "2.3.10",
+	test in assembly := {}
   )
 
 lazy val pluginsSpatialTemporal = (project in file("silk-plugins/silk-plugins-spatial-temporal"))
@@ -95,7 +100,8 @@ lazy val pluginsSpatialTemporal = (project in file("silk-plugins/silk-plugins-sp
     libraryDependencies += "org.geotools" % "gt-referencing" % "13.1",
     libraryDependencies += "org.geotools" % "gt-jts-wrapper" % "13.1",
     libraryDependencies += "org.geotools" % "gt-epsg-wkt" % "13.1",
-    resolvers += "OpenGeo Maven Repository" at "http://download.osgeo.org/webdav/geotools/"
+    resolvers += "OpenGeo Maven Repository" at "http://download.osgeo.org/webdav/geotools/",
+	test in assembly := {}
   )
 
 lazy val plugins = (project in file("silk-plugins"))
@@ -103,7 +109,8 @@ lazy val plugins = (project in file("silk-plugins"))
   .aggregate(pluginsRdf, pluginsCsv, pluginsXml, pluginsJson, pluginsSpatialTemporal)
   .settings(commonSettings: _*)
   .settings(
-    name := "Silk Plugins"
+    name := "Silk Plugins",
+	test in assembly := {}
   )
 
 //////////////////////////////////////////////////////////////////////////////
@@ -180,11 +187,22 @@ lazy val singlemachine = (project in file("silk-tools/silk-singlemachine"))
     libraryDependencies += "org.slf4j" % "slf4j-jdk14" % "1.7.13",
     // The assembly plugin cannot resolve multiple dependencies to commons logging
     assemblyMergeStrategy in assembly := {
-      case PathList("org", "apache", "commons", "logging",  xs @ _*) => MergeStrategy.first
+      case PathList("org", "apache", "commons",   xs @ _*) => MergeStrategy.first
+      case PathList("riotcmd", xs @ _*) => MergeStrategy.first
+      case PathList("com", "fasterxml",  xs @ _*) => MergeStrategy.first
+      case PathList("org", "apache", "jena" , xs @ _*) => MergeStrategy.first
+      case PathList("org", "slf4j",  xs @ _*) => MergeStrategy.first
+      case PathList("etc", xs @ _*) => MergeStrategy.first
+      case PathList("jena", xs @ _*) => MergeStrategy.first
+      case PathList("arq", xs @ _*) => MergeStrategy.first
+      case PathList("com","github", xs @ _*) => MergeStrategy.first
+
+
       case other =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(other)
-    }
+    },
+	test in assembly := {}
   )
 
 //////////////////////////////////////////////////////////////////////////////

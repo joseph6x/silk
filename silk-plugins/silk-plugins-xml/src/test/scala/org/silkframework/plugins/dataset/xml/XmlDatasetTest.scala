@@ -21,7 +21,7 @@ class XmlDatasetTest extends FlatSpec with Matchers {
   val personValue = Path.parse("Properties/Property[Key = \"2\"]/Value")
 
   val entityDesc =
-    EntitySchema(
+    EntitySchema("",
       typeUri = Uri(""),
       paths = IndexedSeq(personId, personName, personBirth, personDeath, personValue)
     )
