@@ -196,7 +196,7 @@ lazy val singlemachine = (project in file("silk-tools/silk-singlemachine"))
       case PathList("jena", xs @ _*) => MergeStrategy.first
       case PathList("arq", xs @ _*) => MergeStrategy.first
       case PathList("com","github", xs @ _*) => MergeStrategy.first
-      case PathList("jena-log4j.properties") => MergeStrategy.first
+
 
       case other =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
