@@ -6,6 +6,12 @@
 package edu.ucuenca.authorsrelatedness;
 
 import com.google.common.base.Joiner;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 import java.io.IOException;
@@ -45,12 +51,9 @@ import org.apache.jena.atlas.json.JSON;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.json.JsonValue;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
+
+
+
 
 /**
  *
@@ -74,7 +77,7 @@ public class Distance {
     public Distance() throws IOException {
         InputStream resourceAsStream = this.getClass().getResourceAsStream("/config.cnf");
         //String readFile = readFile("./config.cnf", Charset.defaultCharset());
-        String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset()); 
+        String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset().toString()); 
         config = JSON.parse(theString).getAsObject();
         
         
@@ -238,6 +241,7 @@ public class Distance {
             r = cc.getValue();
         }
 
+        conn.close();
         return r;
     }
 
