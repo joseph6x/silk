@@ -42,8 +42,9 @@ case class JaccardDistanceWithContextValidation(@Param(value = "The maximum sema
          var Distance2 = new Distance()
         di=Distance2.NWD(u1,d1,u2,d2,"")
         System.out.println(u1+"|"+d1+"|"+u2+"|"+d2+"|"+di)
+         // Distance2.close();
    } catch {
-     case e: Exception => System.out.println(e+e.getStackTraceString)
+     case e: Exception => System.out.println("Warn: "+e+e.getStackTraceString)
    }
    if(di>ContextDistance){
         1.0

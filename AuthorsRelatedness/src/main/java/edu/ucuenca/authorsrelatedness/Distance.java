@@ -52,9 +52,6 @@ import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
 import org.apache.jena.atlas.json.JsonValue;
 
-
-
-
 /**
  *
  * @author bibliodigital
@@ -70,17 +67,16 @@ public class Distance {
     String PASS = "amd";
 
     Connection conn = null;
-    Statement stmt = null;
+    //Statement stmt = null;
 
     JsonObject config = null;
 
-    public Distance() throws IOException {
+    public Distance() throws IOException, ClassNotFoundException {
         InputStream resourceAsStream = this.getClass().getResourceAsStream("/config.cnf");
         //String readFile = readFile("./config.cnf", Charset.defaultCharset());
-        String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset().toString()); 
+        String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset().toString());
         config = JSON.parse(theString).getAsObject();
-        
-        
+
         DB_URL = DB_URL + config.get("dbServer").getAsString().value() + "/" + config.get("dbSchema").getAsString().value();
         USER = config.get("dbUser").getAsString().value();
         PASS = config.get("dbPassword").getAsString().value();
@@ -93,22 +89,19 @@ public class Distance {
         return new String(encoded, encoding);
     }
 
+    public void close() throws SQLException {
+        //conn.close();
+    }
+
     /**
      * @param args the command line arguments
      */
     public synchronized double NWD(String uri1, String end1, String uri2, String end2, String quy) throws Exception {
-        Class.forName("com.mysql.jdbc.Driver");
 
+        Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
         Map<String, List<String>> map = new HashMap<>();
-
-        if (true) {
-
-            //  System.out.println(NGD("cuenca","semantic web"));
-            // System.out.println(NGD("cuenca","ecuador"));
-            // return;
-        }
 
         List<String> Authors = new ArrayList();
         Authors.add(uri1);
@@ -117,6 +110,8 @@ public class Distance {
         Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ACURIO_DEL_PINO__SANTIAGO");
         Authors.add("http://190.15.141.66:8899/puce/contribuyente/ACURIO_DEL_PINO__SANTIAGO");
         Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ACURIO_PAEZ__FAUSTO_DAVID");
+        
+        
         Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/CHUCHUCA__VICTOR");
         Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA__VICTOR");
         Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA_GALARZA__VICTOR_HUGO");
@@ -144,12 +139,14 @@ public class Distance {
         /*      Endpoints.add("http://190.15.141.102:8891/myservice/query");
         Endpoints.add("http://190.15.141.66:8893/myservice/query");
         Endpoints.add("http://190.15.141.102:8891/myservice/query");
+        
         Endpoints.add("http://190.15.141.102:8891/myservice/query");
         Endpoints.add("http://190.15.141.102:8891/myservice/query");
         Endpoints.add("http://190.15.141.102:8891/myservice/query");
         Endpoints.add("http://190.15.141.66:8890/myservice/query");
         Endpoints.add("http://190.15.141.102:8891/myservice/query");
         Endpoints.add("http://190.15.141.66:8893/myservice/query");
+        
         Endpoints.add("http://190.15.141.102:8891/myservice/query");
         Endpoints.add("http://190.15.141.66:8893/myservice/query");
         Endpoints.add("http://190.15.141.66:8891/myservice/query");
@@ -183,8 +180,8 @@ public class Distance {
                     ka1 = map.get(a1);
                 } else {
                     ka1 = consultado2(a1, Endpoints.get(i));
-                    String t1_ = traductor(Joiner.on(" | ").join(ka1)).toLowerCase();
-                    ka1 = new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
+                    //String t1_ = traductor(Joiner.on(" | ").join(ka1)).toLowerCase();
+                    ka1 = traductor(ka1);//new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
                     ka1 = clean(ka1);
                     ka1 = TopT(ka1, (int) (2.0 * Math.log(ka1.size())));
                     map.put(a1, ka1);
@@ -194,8 +191,8 @@ public class Distance {
                     ka2 = map.get(a2);
                 } else {
                     ka2 = consultado2(a2, Endpoints.get(j));
-                    String t2_ = traductor(Joiner.on(" | ").join(ka2)).toLowerCase();
-                    ka2 = new LinkedList<String>(java.util.Arrays.asList(t2_.split("\\s\\|\\s")));
+                    //String t2_ = traductor(Joiner.on(" | ").join(ka2)).toLowerCase();
+                    ka2 = traductor(ka2);//new LinkedList<String>(java.util.Arrays.asList(t2_.split("\\s\\|\\s")));
                     ka2 = clean(ka2);
                     ka2 = TopT(ka2, (int) (2.0 * Math.log(ka2.size())));
                     map.put(a2, ka2);
@@ -242,6 +239,7 @@ public class Distance {
         }
 
         conn.close();
+
         return r;
     }
 
@@ -275,7 +273,6 @@ public class Distance {
                 // System.out.println(arrayList.get(i)+"__"+arrayList2.get(i));
             }
         }
-
         return ls;
     }
 
@@ -331,6 +328,10 @@ public class Distance {
         a = a.trim();
         b = b.trim();
 
+        if (a.compareToIgnoreCase(b) == 0) {
+            return 0;
+        }
+
         //double n0 = getResultsCount(""+a+"");
         //double n1 = getResultsCount(""+b+"");
         //String c = ""+a+" "+b+"";
@@ -371,8 +372,14 @@ public class Distance {
 
     public String traductorBing(String palabras) {
 
-        Translate.setClientId("fedquest");
-        Translate.setClientSecret("ohCuvdnTlx8Sac4r7gfqyHy0xOJJpKK9duFC4tn9Sho=");
+        if (false) {
+            Translate.setClientId("fedquest");
+            Translate.setClientSecret("ohCuvdnTlx8Sac4r7gfqyHy0xOJJpKK9duFC4tn9Sho=");
+        } else {
+            Translate.setClientId("karyabad");
+            Translate.setClientSecret("viz4JYZAD8samvwuoV6gJ5MczDig8cBHyP0NnY1gRF0=");
+        }
+
         String translatedText;
         try {
             translatedText = Translate.execute(palabras, Language.ENGLISH);
@@ -404,7 +411,7 @@ public class Distance {
         return palabras;
     }
 
-    private double getResultsCount(final String query) throws IOException, SQLException {
+    private double getResultsCount(String query) throws IOException, SQLException {
 
         double c = 0;
         c = getResultsCount1(query);
@@ -433,14 +440,11 @@ public class Distance {
         al.clear();
         al.addAll(hs);
 
-        
         JsonArray asArray = config.get("stopwords").getAsArray();
-        
-        for (JsonValue s:asArray){
+
+        for (JsonValue s : asArray) {
             al.remove(s.getAsString().value());
         }
-        
-        
 
         return al;
     }
@@ -469,17 +473,20 @@ public class Distance {
         return list.toArray(new String[list.size()]);
     }
 
-    public String Http(String s) throws SQLException, IOException {
+    public synchronized String Http(String s) throws SQLException, IOException {
 
-        stmt = conn.createStatement();
+        Statement stmt = conn.createStatement();
         String sql;
         sql = "SELECT * FROM cache where cache.key='" + getMD5(s) + "'";
         java.sql.ResultSet rs = stmt.executeQuery(sql);
         String resp = "";
         if (rs.next()) {
             resp = rs.getString("value");
-            //System.out.println("ok c..");
+            rs.close();
+            stmt.close();
         } else {
+            rs.close();
+            stmt.close();
             final URL url = new URL(s);
             final URLConnection connection = url.openConnection();
             connection.setConnectTimeout(60000);
@@ -504,22 +511,25 @@ public class Distance {
             }
 
         }
-        rs.close();
-        stmt.close();
+
         return resp;
     }
 
-    public String Http2(String s, Map<String, String> mp) throws SQLException, IOException {
+    public synchronized String Http2(String s, Map<String, String> mp) throws SQLException, IOException {
         String md = s + mp.toString();
-        stmt = conn.createStatement();
+        Statement stmt = conn.createStatement();
         String sql;
         sql = "SELECT * FROM cache where cache.key='" + getMD5(md) + "'";
         java.sql.ResultSet rs = stmt.executeQuery(sql);
         String resp = "";
         if (rs.next()) {
             resp = rs.getString("value");
-            //System.out.println("ok c..");
+            rs.close();
+            stmt.close();
         } else {
+            rs.close();
+            stmt.close();
+
             HttpClient client = new HttpClient();
             PostMethod method = new PostMethod(s);
 
@@ -551,8 +561,7 @@ public class Distance {
             }
 
         }
-        rs.close();
-        stmt.close();
+
         return resp;
     }
 
@@ -580,16 +589,22 @@ public class Distance {
         mp.put("key", "trnsl.1.1.20160321T160516Z.43cfb95e23a69315.6c0a2ae19f56388c134615f4740fbb1d400f15d3");
         mp.put("lang", "en");
         mp.put("text", palabras);
+        mp.put("options", "1");
         
+        
+        String rs = "";
         try {
             String Http = Http2(url, mp);
+            rs = Http;
             String res = Http;
             JsonObject parse = JSON.parse(res).getAsObject();
             JsonArray asArray = parse.get("text").getAsArray();
             res = asArray.get(0).getAsString().value();
             palabras = res;
         } catch (Exception e) {
-            try {
+            System.out.println(palabras + rs);
+            e.printStackTrace(new PrintStream(System.out));
+            /*try {
                 String[] ls = palabras.split("\\s\\|\\s");
                 int chunk = ls.length / 2; // chunk size to divide
                 String pal = "";
@@ -605,18 +620,26 @@ public class Distance {
                 return pal;
 
             } catch (Exception exx) {
-                exx.printStackTrace(new PrintStream(System.out));
-            }
+             */
+
+            //}
         }
 
         return palabras;
 
     }
 
-    private String traductor(String join) throws SQLException, IOException {
-        String v = traductorYandex(join);
-        //System.out.println(join+"     "+v);
-        return v;
+    private List<String> traductor(List<String> join) throws SQLException, IOException {
+
+        List<String> ls = new ArrayList();
+        for (String w : join) {
+            if (true) {
+                ls.add(traductorYandex(w.trim()).trim().toLowerCase());
+            } else {
+                ls.add(traductorBing(w.trim()).trim().toLowerCase());
+            }
+        }
+        return ls;
     }
 
 }
