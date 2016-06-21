@@ -57,30 +57,22 @@ import org.apache.jena.atlas.json.JsonValue;
  * @author bibliodigital
  */
 public class Distance {
-
     // JDBC driver name and database URL
     String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     String DB_URL = "jdbc:mysql://";
-
     //  Database credentials
     String USER = "usr";
     String PASS = "amd";
-
     Connection conn = null;
-    //Statement stmt = null;
-
     JsonObject config = null;
 
     public Distance() throws IOException, ClassNotFoundException {
         InputStream resourceAsStream = this.getClass().getResourceAsStream("/config.cnf");
-        //String readFile = readFile("./config.cnf", Charset.defaultCharset());
         String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset().toString());
         config = JSON.parse(theString).getAsObject();
-
         DB_URL = DB_URL + config.get("dbServer").getAsString().value() + "/" + config.get("dbSchema").getAsString().value();
         USER = config.get("dbUser").getAsString().value();
         PASS = config.get("dbPassword").getAsString().value();
-
     }
 
     String readFile(String path, Charset encoding)
@@ -106,72 +98,12 @@ public class Distance {
         List<String> Authors = new ArrayList();
         Authors.add(uri1);
         Authors.add(uri2);
-        /*
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ACURIO_DEL_PINO__SANTIAGO");
-        Authors.add("http://190.15.141.66:8899/puce/contribuyente/ACURIO_DEL_PINO__SANTIAGO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ACURIO_PAEZ__FAUSTO_DAVID");
-        
-        
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/CHUCHUCA__VICTOR");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA__VICTOR");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA_GALARZA__VICTOR_HUGO");
-        Authors.add("http://190.15.141.66:8899/cedia/contribuyente/SAQUICELA__VICTOR");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA__V");
-        Authors.add("http://190.15.141.66:8899/puce/contribuyente/CEVALLOS__VICTOR");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/AREVALO__VICTOR");
-        Authors.add("http://190.15.141.66:8899/puce/contribuyente/DEL_PINO__EMILIA");
-        Authors.add("http://190.15.141.66:8899/uce/contribuyente/ACURIO_ACURIO__JAIME_NEPTALI");
-        Authors.add("http://190.15.141.66:8899/uide/contribuyente/ACURIO_DEL_PINO__SANTIAGO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ESPINOZA__MAURICIO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ESPINOZA_ESPINOZA__JHONNY_MAURICIO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ASTUDILLO_ESPINOZA__CHRISTIAN_MAURICIO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ESPINOZA_MEJIA__JORGE_MAURICIO");
-        Authors.add("http://190.15.141.66:8899/cedia/contribuyente/ESPINOZA__MAURICIO");
-
-        Authors.add("http://190.15.141.66:8899/puce/contribuyente/ESPINOZA__OSWALDO");
-        Authors.add("http://190.15.141.66:8899/puce/contribuyente/ESPINOZA_VITERI__OSWALDO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ESPINOZA_VEINTIMILLA__ANGEL_OSWALDO");
-        Authors.add("http://190.15.141.66:8899/ucuenca/contribuyente/ENCALADA_ESPINOZA__OSWALDO_JAVIER");
-         */
         List<String> Endpoints = new ArrayList();
         Endpoints.add(end1);
         Endpoints.add(end2);
-        /*      Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.66:8893/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.66:8890/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.66:8893/myservice/query");
-        
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.66:8893/myservice/query");
-        Endpoints.add("http://190.15.141.66:8891/myservice/query");
-        Endpoints.add("http://190.15.141.66:8895/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.66:8890/myservice/query");
-
-        Endpoints.add("http://190.15.141.66:8893/myservice/query");
-        Endpoints.add("http://190.15.141.66:8893/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-        Endpoints.add("http://190.15.141.102:8891/myservice/query");
-         */
         Map<String, Double> Result = new HashMap<>();
-
-        double avg = 0;
-        double har = 0;
-
-        double thres = 0.65;
-
         for (int i = 0; i < Authors.size(); i++) {
             for (int j = i + 1; j < Authors.size(); j++) {
-
                 String a1 = Authors.get(i);
                 String a2 = Authors.get(j);
                 List<String> ka1 = null;
@@ -202,8 +134,6 @@ public class Distance {
                 double sum = 0;
                 double num = 0;
 
-                double sum2 = 0;
-
                 for (String t1 : ka1) {
                     for (String t2 : ka2) {
                         num++;
@@ -211,25 +141,13 @@ public class Distance {
                         String tt2 = t2;
                         double v = NGD(tt1, tt2);
                         sum += v;
-
-                        //System.out.println(tt1 + "," + tt2 + "=" + v);
                     }
                 }
                 double prom = sum / num;
-                //System.out.println(i + "," + j + "=" + prom);
+                if (num == 0 && sum == 0) {
+                    prom = 2;
+                }
                 Result.put(i + "," + j, prom);
-
-                if (avg == 0) {
-                    avg = prom;
-                } else {
-                    avg = (avg + prom) / 2;
-                }
-                if (har == 0) {
-                    har = prom;
-                } else {
-                    har = 2 / (1 / har + 1 / prom);
-                }
-
             }
         }
 
@@ -237,19 +155,24 @@ public class Distance {
         for (Map.Entry<String, Double> cc : Result.entrySet()) {
             r = cc.getValue();
         }
-
         conn.close();
-
         return r;
     }
-
     public List<String> TopT(List<String> m, int n) throws IOException, SQLException {
+        n = (n <= 0) ? 1 : n;
+        if (m.size() == 1) {
+            m.add(m.get(0));
+        }
+        if (config.get("stochastic").getAsBoolean().value()) {
+            Collections.shuffle(m);
+            if (2 * n < m.size()) {
+                m = m.subList(0, 2 * n);
+            }
+        }
         Map<String, Double> Mapa = new HashMap();
         for (int i = 0; i < m.size(); i++) {
             for (int j = i + 1; j < m.size(); j++) {
                 double v = NGD(m.get(i), m.get(j));
-                //System.out.print(i+"/"+m.size()+"\t");
-
                 if (Mapa.containsKey(m.get(i))) {
                     Mapa.put(m.get(i), Mapa.get(m.get(i)) + v);
                 } else {
@@ -270,7 +193,6 @@ public class Distance {
         for (int i = 0; i < n; i++) {
             if (i < sortByValue.size()) {
                 ls.add(arrayList.get(i));
-                // System.out.println(arrayList.get(i)+"__"+arrayList2.get(i));
             }
         }
         return ls;
@@ -481,6 +403,7 @@ public class Distance {
         java.sql.ResultSet rs = stmt.executeQuery(sql);
         String resp = "";
         if (rs.next()) {
+            //System.out.print(".");
             resp = rs.getString("value");
             rs.close();
             stmt.close();
@@ -526,6 +449,7 @@ public class Distance {
             resp = rs.getString("value");
             rs.close();
             stmt.close();
+            //System.out.println("okc,");
         } else {
             rs.close();
             stmt.close();
@@ -590,8 +514,7 @@ public class Distance {
         mp.put("lang", "en");
         mp.put("text", palabras);
         mp.put("options", "1");
-        
-        
+
         String rs = "";
         try {
             String Http = Http2(url, mp);
