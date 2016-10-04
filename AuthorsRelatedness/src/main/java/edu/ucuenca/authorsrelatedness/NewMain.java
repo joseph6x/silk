@@ -8,6 +8,7 @@ package edu.ucuenca.authorsrelatedness;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -17,6 +18,21 @@ import java.util.List;
 public class NewMain {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, Exception {
+        
+        Distance dss = new Distance();
+        
+        List<String> consultado2 = dss.consultado2("http://190.15.141.66:8899/espe/contribuyente/ANDRADE_FUENTES__EDWIN_PAUL", "http://190.15.141.66:8892/myservice/sparql");
+        
+        for (String c : consultado2){
+            System.out.println(""+dss.traductorYandex(c)+"   "+c);
+        }
+        
+        
+        
+        if (true)
+            return ;
+        
+        
 //Distance dd = new Distance();
 
         //      System.out.println(dd.traductorBing("hola mundo cruel"));

@@ -57,6 +57,7 @@ import org.apache.jena.atlas.json.JsonValue;
  * @author bibliodigital
  */
 public class Distance {
+
     // JDBC driver name and database URL
     String JDBC_DRIVER = "com.mysql.jdbc.Driver";
     String DB_URL = "jdbc:mysql://";
@@ -73,6 +74,10 @@ public class Distance {
         DB_URL = DB_URL + config.get("dbServer").getAsString().value() + "/" + config.get("dbSchema").getAsString().value();
         USER = config.get("dbUser").getAsString().value();
         PASS = config.get("dbPassword").getAsString().value();
+        //try{
+        //Class.forName("com.mysql.jdbc.Driver");
+        //conn = DriverManager.getConnection(DB_URL, USER, PASS);
+        //}catch(Exception s){}
     }
 
     String readFile(String path, Charset encoding)
@@ -93,6 +98,22 @@ public class Distance {
         Class.forName("com.mysql.jdbc.Driver");
         conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
+        List <String> prms=new ArrayList();
+        prms.add(uri1+"+"+end1);
+        prms.add(uri2+"+"+end2);
+
+        prms.add(quy);
+        
+        Collections.sort(prms);
+        
+        
+        
+        Double rspc= GetCacheDistance(prms.toString());
+        if (rspc==null)
+        
+        {
+        
+        
         Map<String, List<String>> map = new HashMap<>();
 
         List<String> Authors = new ArrayList();
@@ -115,7 +136,9 @@ public class Distance {
                     //String t1_ = traductor(Joiner.on(" | ").join(ka1)).toLowerCase();
                     ka1 = traductor(ka1);//new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
                     ka1 = clean(ka1);
+                    System.out.println(uri1 + "|E:" + Joiner.on(",").join(ka1));
                     ka1 = TopT(ka1, (int) (2.0 * Math.log(ka1.size())));
+                    System.out.println(uri1 + "|F:" + Joiner.on(",").join(ka1));
                     map.put(a1, ka1);
                 }
 
@@ -126,7 +149,9 @@ public class Distance {
                     //String t2_ = traductor(Joiner.on(" | ").join(ka2)).toLowerCase();
                     ka2 = traductor(ka2);//new LinkedList<String>(java.util.Arrays.asList(t2_.split("\\s\\|\\s")));
                     ka2 = clean(ka2);
+                    System.out.println(uri2 + "|E:" + Joiner.on(",").join(ka2));
                     ka2 = TopT(ka2, (int) (2.0 * Math.log(ka2.size())));
+                    System.out.println(uri2 + "|F:" + Joiner.on(",").join(ka2));
                     map.put(a2, ka2);
                 }
                 //System.out.println(ka1.size() + "," + ka2.size());
@@ -155,9 +180,13 @@ public class Distance {
         for (Map.Entry<String, Double> cc : Result.entrySet()) {
             r = cc.getValue();
         }
+            rspc=r;
+            PutCacheDistance(prms.toString(), rspc);
+        }
         conn.close();
-        return r;
+        return rspc;
     }
+
     public List<String> TopT(List<String> m, int n) throws IOException, SQLException {
         n = (n <= 0) ? 1 : n;
         if (m.size() == 1) {
@@ -257,14 +286,21 @@ public class Distance {
         //double n0 = getResultsCount(""+a+"");
         //double n1 = getResultsCount(""+b+"");
         //String c = ""+a+" "+b+"";
-        double n0 = getResultsCount("\"" + a + "\"~10");
-        double n1 = getResultsCount("\"" + b + "\"~10");
+        String _a = "\"" + a + "\"~10";
+        String _b = "\"" + b + "\"~10";
         String c = "\"" + a + " " + b + "\"~50";
+        if (config.get("relaxMode").getAsBoolean().value()) {
+            _a = "" + a;
+            _b = "" + b;
+            c = a + " " + b;
+        }
 
+        double n0 = getResultsCount(_a);
+        double n1 = getResultsCount(_b);
         double n2 = getResultsCount(c);
         //double m = 5026040.0 * 590;
 
-        double m = 5029469;
+        double m = 5110015;
 
         double distance = 0;
 
@@ -394,7 +430,33 @@ public class Distance {
         list.removeAll(Collections.singleton(null));
         return list.toArray(new String[list.size()]);
     }
+   public synchronized Double GetCacheDistance(String s) throws SQLException {
+        Statement stmt = conn.createStatement();
+        String sql;
+        sql = "SELECT * FROM cache2 where cache2.key='" + getMD5(s) + "'";
+        java.sql.ResultSet rs = stmt.executeQuery(sql);
+        Double resp = null;
+        if (rs.next()) {
+            resp = rs.getDouble("value");
+            rs.close();
+            stmt.close();
+        } else {
+            rs.close();
+            stmt.close();
+        }
+        return resp;
+    }
+    public synchronized void PutCacheDistance(String s, double d) {
+            try {
+                PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO cache2 (cache2.key, value) values (?, ?)");
+                stmt2.setString(1, getMD5(s));
+                stmt2.setDouble(2, d);
+                stmt2.executeUpdate();
+                stmt2.close();
+            } catch (Exception e) {
 
+            }
+    }
     public synchronized String Http(String s) throws SQLException, IOException {
 
         Statement stmt = conn.createStatement();
@@ -442,6 +504,7 @@ public class Distance {
         String md = s + mp.toString();
         Statement stmt = conn.createStatement();
         String sql;
+        System.out.println(""+getMD5(md));
         sql = "SELECT * FROM cache where cache.key='" + getMD5(md) + "'";
         java.sql.ResultSet rs = stmt.executeQuery(sql);
         String resp = "";
@@ -456,6 +519,7 @@ public class Distance {
 
             HttpClient client = new HttpClient();
             PostMethod method = new PostMethod(s);
+            method.getParams().setContentCharset("utf-8");
 
             //Add any parameter if u want to send it with Post req.
             for (Entry<String, String> mcc : mp.entrySet()) {

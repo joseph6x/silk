@@ -43,7 +43,7 @@ case class JaccardDistanceWithContextValidation(@Param(value = "The maximum sema
        try { 
          var Distance2 = new Distance()
         di=Distance2.NWD(u1,d1,u2,d2,"")
-        System.out.println(u1+"|"+d1+"|"+u2+"|"+d2+"|"+di+" "+dis)
+        System.out.println(u1+"|"+u2+"|T:"+di)
          // Distance2.close();
    } catch {
      case e: Exception => System.out.println("Warn: "+e+e.getStackTraceString)
@@ -64,9 +64,12 @@ case class JaccardDistanceWithContextValidation(@Param(value = "The maximum sema
 	var w2 = new ListBuffer[String]()
 
 
-  	var _values1 = values1.filter ( _.trim.nonEmpty ).distinct
+  	var _values1 = values1.filter ( _.trim.nonEmpty ).distinct.sortWith(_.length > _.length)
+  	var _values2 = values2.filter ( _.trim.nonEmpty ).distinct.sortWith(_.length > _.length)
 
-  	var _values2 = values2.filter ( _.trim.nonEmpty ).distinct
+
+  	
+
   	var a_ = new SmithWatermanGotoh()
   	var b_ = new JaroWinkler()
 
@@ -120,6 +123,10 @@ case class JaccardDistanceWithContextValidation(@Param(value = "The maximum sema
 
   	var c = 1.0-((co+0.0)/min)
 
+
+	if (c<=0.01){
+		System.out.println("N1: "+_values1.mkString(",")+"     N2:"+_values2.mkString(",")+"     "+c)
+	}
 	//System.out.println("Warn2: "+c)
 
 	c
