@@ -21,13 +21,16 @@ public class NewMain {
         
         Distance dss = new Distance();
         
-        List<String> consultado2 = dss.consultado2("http://190.15.141.66:8899/espe/contribuyente/ANDRADE_FUENTES__EDWIN_PAUL", "http://190.15.141.66:8892/myservice/sparql");
+        double NWDll = dss.NWD("http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA__VICTOR", 
+                "http://190.15.141.102:8891/myservice/query",
+                "http://190.15.141.66:8899/ucuenca/contribuyente/SAQUICELA_GALARZA__VICTOR_HUGO",
+                "http://190.15.141.102:8891/myservice/query", "");
+        //List<String> consultado2 = dss.consultado2("http://190.15.141.66:8899/espe/contribuyente/ANDRADE_FUENTES__EDWIN_PAUL", "http://190.15.141.66:8892/myservice/sparql");
+        // for (String c : consultado2){
+        //    System.out.println(""+dss.traductorYandex(c)+"   "+c);
+        // }
         
-        for (String c : consultado2){
-            System.out.println(""+dss.traductorYandex(c)+"   "+c);
-        }
-        
-        
+        System.out.println(""+NWDll);
         
         if (true)
             return ;

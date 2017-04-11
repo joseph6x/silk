@@ -18,20 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,7 +36,6 @@ import java.util.Scanner;
 import java.util.Set;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.io.IOUtils;
 import org.apache.jena.atlas.json.JSON;
 import org.apache.jena.atlas.json.JsonArray;
 import org.apache.jena.atlas.json.JsonObject;
@@ -58,132 +47,90 @@ import org.apache.jena.atlas.json.JsonValue;
  */
 public class Distance {
 
-    // JDBC driver name and database URL
-    String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    String DB_URL = "jdbc:mysql://";
-    //  Database credentials
-    String USER = "usr";
-    String PASS = "amd";
-    Connection conn = null;
-    JsonObject config = null;
-
     public Distance() throws IOException, ClassNotFoundException {
-        InputStream resourceAsStream = this.getClass().getResourceAsStream("/config.cnf");
-        String theString = IOUtils.toString(resourceAsStream, Charset.defaultCharset().toString());
-        config = JSON.parse(theString).getAsObject();
-        DB_URL = DB_URL + config.get("dbServer").getAsString().value() + "/" + config.get("dbSchema").getAsString().value();
-        USER = config.get("dbUser").getAsString().value();
-        PASS = config.get("dbPassword").getAsString().value();
-        //try{
-        //Class.forName("com.mysql.jdbc.Driver");
-        //conn = DriverManager.getConnection(DB_URL, USER, PASS);
-        //}catch(Exception s){}
+
     }
 
-    String readFile(String path, Charset encoding)
-            throws IOException {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return new String(encoded, encoding);
-    }
+    public double NWD(String uri1, String end1, String uri2, String end2, String quy) throws Exception {
 
-    public void close() throws SQLException {
-        //conn.close();
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public synchronized double NWD(String uri1, String end1, String uri2, String end2, String quy) throws Exception {
-
-        Class.forName("com.mysql.jdbc.Driver");
-        conn = DriverManager.getConnection(DB_URL, USER, PASS);
-
-        List <String> prms=new ArrayList();
-        prms.add(uri1+"+"+end1);
-        prms.add(uri2+"+"+end2);
+        List<String> prms = new ArrayList();
+        prms.add(uri1 + "+" + end1);
+        prms.add(uri2 + "+" + end2);
 
         prms.add(quy);
-        
+
         Collections.sort(prms);
-        
-        
-        
-        Double rspc= GetCacheDistance(prms.toString());
-        if (rspc==null)
-        
-        {
-        
-        
-        Map<String, List<String>> map = new HashMap<>();
 
-        List<String> Authors = new ArrayList();
-        Authors.add(uri1);
-        Authors.add(uri2);
-        List<String> Endpoints = new ArrayList();
-        Endpoints.add(end1);
-        Endpoints.add(end2);
-        Map<String, Double> Result = new HashMap<>();
-        for (int i = 0; i < Authors.size(); i++) {
-            for (int j = i + 1; j < Authors.size(); j++) {
-                String a1 = Authors.get(i);
-                String a2 = Authors.get(j);
-                List<String> ka1 = null;
-                List<String> ka2 = null;
-                if (map.containsKey(a1)) {
-                    ka1 = map.get(a1);
-                } else {
-                    ka1 = consultado2(a1, Endpoints.get(i));
-                    //String t1_ = traductor(Joiner.on(" | ").join(ka1)).toLowerCase();
-                    ka1 = traductor(ka1);//new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
-                    ka1 = clean(ka1);
-                    System.out.println(uri1 + "|E:" + Joiner.on(",").join(ka1));
-                    ka1 = TopT(ka1, (int) (2.0 * Math.log(ka1.size())));
-                    System.out.println(uri1 + "|F:" + Joiner.on(",").join(ka1));
-                    map.put(a1, ka1);
-                }
-
-                if (map.containsKey(a2)) {
-                    ka2 = map.get(a2);
-                } else {
-                    ka2 = consultado2(a2, Endpoints.get(j));
-                    //String t2_ = traductor(Joiner.on(" | ").join(ka2)).toLowerCase();
-                    ka2 = traductor(ka2);//new LinkedList<String>(java.util.Arrays.asList(t2_.split("\\s\\|\\s")));
-                    ka2 = clean(ka2);
-                    System.out.println(uri2 + "|E:" + Joiner.on(",").join(ka2));
-                    ka2 = TopT(ka2, (int) (2.0 * Math.log(ka2.size())));
-                    System.out.println(uri2 + "|F:" + Joiner.on(",").join(ka2));
-                    map.put(a2, ka2);
-                }
-                //System.out.println(ka1.size() + "," + ka2.size());
-
-                double sum = 0;
-                double num = 0;
-
-                for (String t1 : ka1) {
-                    for (String t2 : ka2) {
-                        num++;
-                        String tt1 = t1;
-                        String tt2 = t2;
-                        double v = NGD(tt1, tt2);
-                        sum += v;
+        Double rspc = GetCacheDistance(prms.toString());
+        if (rspc == null) {
+            Map<String, List<String>> map = new HashMap<>();
+            List<String> Authors = new ArrayList();
+            Authors.add(uri1);
+            Authors.add(uri2);
+            List<String> Endpoints = new ArrayList();
+            Endpoints.add(end1);
+            Endpoints.add(end2);
+            Map<String, Double> Result = new HashMap<>();
+            for (int i = 0; i < Authors.size(); i++) {
+                for (int j = i + 1; j < Authors.size(); j++) {
+                    String a1 = Authors.get(i);
+                    String a2 = Authors.get(j);
+                    List<String> ka1 = null;
+                    List<String> ka2 = null;
+                    if (map.containsKey(a1)) {
+                        ka1 = map.get(a1);
+                    } else {
+                        ka1 = consultado2(a1, Endpoints.get(i));
+                        //String t1_ = traductor(Joiner.on(" | ").join(ka1)).toLowerCase();
+                        ka1 = traductor(ka1);//new LinkedList<String>(java.util.Arrays.asList(t1_.split("\\s\\|\\s")));
+                        ka1 = clean(ka1);
+                        System.out.println(uri1 + "|E:" + Joiner.on(",").join(ka1));
+                        ka1 = TopT(ka1, (int) (2.0 * Math.log(ka1.size())));
+                        System.out.println(uri1 + "|F:" + Joiner.on(",").join(ka1));
+                        map.put(a1, ka1);
                     }
-                }
-                double prom = sum / num;
-                if (num == 0 && sum == 0) {
-                    prom = 2;
-                }
-                Result.put(i + "," + j, prom);
-            }
-        }
 
-        double r = 0;
-        for (Map.Entry<String, Double> cc : Result.entrySet()) {
-            r = cc.getValue();
-        }
-            rspc=r;
+                    if (map.containsKey(a2)) {
+                        ka2 = map.get(a2);
+                    } else {
+                        ka2 = consultado2(a2, Endpoints.get(j));
+                        //String t2_ = traductor(Joiner.on(" | ").join(ka2)).toLowerCase();
+                        ka2 = traductor(ka2);//new LinkedList<String>(java.util.Arrays.asList(t2_.split("\\s\\|\\s")));
+                        ka2 = clean(ka2);
+                        System.out.println(uri2 + "|E:" + Joiner.on(",").join(ka2));
+                        ka2 = TopT(ka2, (int) (2.0 * Math.log(ka2.size())));
+                        System.out.println(uri2 + "|F:" + Joiner.on(",").join(ka2));
+                        map.put(a2, ka2);
+                    }
+                    //System.out.println(ka1.size() + "," + ka2.size());
+
+                    double sum = 0;
+                    double num = 0;
+
+                    for (String t1 : ka1) {
+                        for (String t2 : ka2) {
+                            num++;
+                            String tt1 = t1;
+                            String tt2 = t2;
+                            double v = NGD(tt1, tt2);
+                            sum += v;
+                        }
+                    }
+                    double prom = sum / num;
+                    if (num == 0 && sum == 0) {
+                        prom = 2;
+                    }
+                    Result.put(i + "," + j, prom);
+                }
+            }
+
+            double r = 0;
+            for (Map.Entry<String, Double> cc : Result.entrySet()) {
+                r = cc.getValue();
+            }
+            rspc = r;
             PutCacheDistance(prms.toString(), rspc);
         }
-        conn.close();
         return rspc;
     }
 
@@ -192,7 +139,7 @@ public class Distance {
         if (m.size() == 1) {
             m.add(m.get(0));
         }
-        if (config.get("stochastic").getAsBoolean().value()) {
+        if (Cache.getInstance().config.get("stochastic").getAsBoolean().value()) {
             Collections.shuffle(m);
             if (2 * n < m.size()) {
                 m = m.subList(0, 2 * n);
@@ -202,6 +149,8 @@ public class Distance {
         for (int i = 0; i < m.size(); i++) {
             for (int j = i + 1; j < m.size(); j++) {
                 double v = NGD(m.get(i), m.get(j));
+                System.out.println(m.get(i)+","+ m.get(j)+"="+v);
+                
                 if (Mapa.containsKey(m.get(i))) {
                     Mapa.put(m.get(i), Mapa.get(m.get(i)) + v);
                 } else {
@@ -240,7 +189,7 @@ public class Distance {
         String entidad = ent;
         String endpoint = end;
 
-        String consulta = config.get("contextQuery").getAsString().value().replaceAll("\\|\\?\\|", entidad);
+        String consulta = Cache.getInstance().config.get("contextQuery").getAsString().value().replaceAll("\\|\\?\\|", entidad);
 
         Query query = QueryFactory.create(consulta);
         QueryExecution qexec = QueryExecutionFactory.sparqlService(endpoint, query);
@@ -289,7 +238,7 @@ public class Distance {
         String _a = "\"" + a + "\"~10";
         String _b = "\"" + b + "\"~10";
         String c = "\"" + a + " " + b + "\"~50";
-        if (config.get("relaxMode").getAsBoolean().value()) {
+        if (Cache.getInstance().config.get("relaxMode").getAsBoolean().value()) {
             _a = "" + a;
             _b = "" + b;
             c = a + " " + b;
@@ -300,7 +249,7 @@ public class Distance {
         double n2 = getResultsCount(c);
         //double m = 5026040.0 * 590;
 
-        double m = 5110015;
+        double m = getResultsCount("the");
 
         double distance = 0;
 
@@ -398,7 +347,7 @@ public class Distance {
         al.clear();
         al.addAll(hs);
 
-        JsonArray asArray = config.get("stopwords").getAsArray();
+        JsonArray asArray = Cache.getInstance().config.get("stopwords").getAsArray();
 
         for (JsonValue s : asArray) {
             al.remove(s.getAsString().value());
@@ -430,48 +379,30 @@ public class Distance {
         list.removeAll(Collections.singleton(null));
         return list.toArray(new String[list.size()]);
     }
-   public synchronized Double GetCacheDistance(String s) throws SQLException {
-        Statement stmt = conn.createStatement();
-        String sql;
-        sql = "SELECT * FROM cache2 where cache2.key='" + getMD5(s) + "'";
-        java.sql.ResultSet rs = stmt.executeQuery(sql);
+
+    public synchronized Double GetCacheDistance(String s) throws SQLException {
+
         Double resp = null;
-        if (rs.next()) {
-            resp = rs.getDouble("value");
-            rs.close();
-            stmt.close();
-        } else {
-            rs.close();
-            stmt.close();
+        try {
+            String get = Cache.getInstance().get(s);
+            resp = Double.parseDouble(get);
+        } catch (Exception e) {
         }
         return resp;
     }
-    public synchronized void PutCacheDistance(String s, double d) {
-            try {
-                PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO cache2 (cache2.key, value) values (?, ?)");
-                stmt2.setString(1, getMD5(s));
-                stmt2.setDouble(2, d);
-                stmt2.executeUpdate();
-                stmt2.close();
-            } catch (Exception e) {
 
-            }
+    public synchronized void PutCacheDistance(String s, double d) {
+        Cache.getInstance().put(s, d + "");
     }
+
     public synchronized String Http(String s) throws SQLException, IOException {
 
-        Statement stmt = conn.createStatement();
-        String sql;
-        sql = "SELECT * FROM cache where cache.key='" + getMD5(s) + "'";
-        java.sql.ResultSet rs = stmt.executeQuery(sql);
+        String get = Cache.getInstance().get(s);
         String resp = "";
-        if (rs.next()) {
+        if (get != null) {
             //System.out.print(".");
-            resp = rs.getString("value");
-            rs.close();
-            stmt.close();
+            resp = get;
         } else {
-            rs.close();
-            stmt.close();
             final URL url = new URL(s);
             final URLConnection connection = url.openConnection();
             connection.setConnectTimeout(60000);
@@ -485,16 +416,7 @@ public class Distance {
             }
             reader.close();
 
-            try {
-                PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO cache (cache.key, value) values (?, ?)");
-                stmt2.setString(1, getMD5(s));
-                stmt2.setString(2, resp);
-                stmt2.executeUpdate();
-                stmt2.close();
-            } catch (Exception e) {
-
-            }
-
+            Cache.getInstance().put(s, resp);
         }
 
         return resp;
@@ -502,21 +424,11 @@ public class Distance {
 
     public synchronized String Http2(String s, Map<String, String> mp) throws SQLException, IOException {
         String md = s + mp.toString();
-        Statement stmt = conn.createStatement();
-        String sql;
-        System.out.println(""+getMD5(md));
-        sql = "SELECT * FROM cache where cache.key='" + getMD5(md) + "'";
-        java.sql.ResultSet rs = stmt.executeQuery(sql);
+        String get = Cache.getInstance().get(md);
         String resp = "";
-        if (rs.next()) {
-            resp = rs.getString("value");
-            rs.close();
-            stmt.close();
-            //System.out.println("okc,");
+        if (get != null) {
+            resp = get;
         } else {
-            rs.close();
-            stmt.close();
-
             HttpClient client = new HttpClient();
             PostMethod method = new PostMethod(s);
             method.getParams().setContentCharset("utf-8");
@@ -536,37 +448,13 @@ public class Distance {
                     resp += line + "\n";
                 }
                 reader.close();
-                try {
-                    PreparedStatement stmt2 = conn.prepareStatement("INSERT INTO cache (cache.key, value) values (?, ?)");
-                    stmt2.setString(1, getMD5(md));
-                    stmt2.setString(2, resp);
-                    stmt2.executeUpdate();
-                    stmt2.close();
-                } catch (Exception e) {
-
-                }
+                Cache.getInstance().put(md, resp);
 
             }
 
         }
 
         return resp;
-    }
-
-    public String getMD5(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] messageDigest = md.digest(input.getBytes());
-            BigInteger number = new BigInteger(1, messageDigest);
-            String hashtext = number.toString(16);
-            // Now we need to zero pad it if you actually want the full 32 chars.
-            while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
-            }
-            return hashtext;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public String traductorYandex(String palabras) throws UnsupportedEncodingException, SQLException, IOException {
@@ -591,33 +479,11 @@ public class Distance {
         } catch (Exception e) {
             System.out.println(palabras + rs);
             e.printStackTrace(new PrintStream(System.out));
-            /*try {
-                String[] ls = palabras.split("\\s\\|\\s");
-                int chunk = ls.length / 2; // chunk size to divide
-                String pal = "";
-                for (int i = 0; i < ls.length; i += chunk) {
-                    String[] pr = java.util.Arrays.copyOfRange(ls, i, i + chunk);
-                    pr = clean2(pr);
-                    String u = Joiner.on(" | ").join(pr);
-                    u = traductorYandex(u);
-                    pal += u + " ";
-
-                }
-
-                return pal;
-
-            } catch (Exception exx) {
-             */
-
-            //}
         }
-
         return palabras;
-
     }
 
     private List<String> traductor(List<String> join) throws SQLException, IOException {
-
         List<String> ls = new ArrayList();
         for (String w : join) {
             if (true) {
