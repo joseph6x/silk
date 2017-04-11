@@ -52,6 +52,7 @@ public class Cache {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 try {
+                    System.out.println("Killing ");
                     Kill();
                 } catch (SQLException ex) {
                     Logger.getLogger(Cache.class.getName()).log(Level.SEVERE, null, ex);

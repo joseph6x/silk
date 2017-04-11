@@ -246,7 +246,14 @@ public class Distance {
 
         double n0 = getResultsCount(_a);
         double n1 = getResultsCount(_b);
-        double n2 = getResultsCount(c);
+        double n2=0;
+        
+        if (n0==0 || n1 ==0){
+            n2 = 0;
+        }else{
+            n2 = getResultsCount(c);
+        }
+        
         //double m = 5026040.0 * 590;
 
         double m = getResultsCount("the");
